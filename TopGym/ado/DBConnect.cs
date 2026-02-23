@@ -1,11 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace _TopGym.ado
@@ -19,28 +13,30 @@ namespace _TopGym.ado
         private string password;
         bool openConnection = false;
 
-        //Constructor
+        // Constructor
         public DBConnect()
         {
             Initialize();
         }
 
-        //Initialize values
+        // Initialize values
         private void Initialize()
         {
             server = "localhost";
-            database = "world";
-            uid = "root";
-            password = "root";
-            string connectionString;
-            connectionString = "SERVER=" + server + ";" + "DATABASE=" +
-            database + ";" + "UID=" + uid + ";" + "PASSWORD=" + password + ";";
+            database = "TopGym";   // ← base de datos creada
+            uid = "root";     // ← tu usuario de MySQL
+            password = "root";     // ← tu contraseña de MySQL
+
+            string connectionString = "SERVER=" + server + ";" +
+                                      "DATABASE=" + database + ";" +
+                                      "UID=" + uid + ";" +
+                                      "PASSWORD=" + password + ";" +
+                                      "CharSet=utf8;";  // ← evita problemas con tildes y ñ
 
             connection = new MySqlConnection(connectionString);
-
         }
 
-        //open connection to database
+        // Abrir conexión
         private bool OpenConnection()
         {
             try
@@ -54,79 +50,91 @@ namespace _TopGym.ado
             }
             catch (MySqlException ex)
             {
-                //When handling errors, you can your application's response based 
-                //on the error number.
-                //The two most common error numbers when connecting are as follows:
-                //0: Cannot connect to server.
-                //1045: Invalid user name and/or password.
                 switch (ex.Number)
                 {
                     case 0:
-                        MessageBox.Show("Cannot connect to server.  Contact administrator");
+                        MessageBox.Show("No se puede conectar al servidor. Contacta con el administrador.",
+                                        "Error de conexión", MessageBoxButton.OK, MessageBoxImage.Error);
                         break;
-
                     case 1045:
-                        MessageBox.Show("Invalid username/password, please try again");
+                        MessageBox.Show("Usuario o contraseña incorrectos.",
+                                        "Error de autenticación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        break;
+                    default:
+                        MessageBox.Show("Error de base de datos: " + ex.Message,
+                                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         break;
                 }
+                openConnection = false;
                 return false;
             }
         }
 
-        //Close connection
+        // Cerrar conexión
         public bool Close()
         {
             try
             {
-                connection.Close();
+                if (connection.State == ConnectionState.Open)
+                {
+                    connection.Close();
+                    openConnection = false;
+                }
                 return true;
             }
             catch (MySqlException ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("Error al cerrar la conexión: " + ex.Message,
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }
 
-
-        //Insert statement
-        public int executeQuery(MySqlCommand mySqlCommand)
+        // INSERT, UPDATE, DELETE → devuelve filas afectadas
+        public int ExecuteQuery(MySqlCommand mySqlCommand)
         {
             int registros = 0;
-            //open connection
-            if (this.OpenConnection() == true)
+            if (this.OpenConnection())
             {
-
-                //Execute command
                 mySqlCommand.Connection = this.connection;
                 registros = mySqlCommand.ExecuteNonQuery();
+                this.Close();
             }
             return registros;
         }
 
-
-        //Select statement
+        // SELECT → devuelve DataReader (recuerda cerrarlo después de usarlo)
         public MySqlDataReader Select(MySqlCommand mySqlCommand)
         {
             MySqlDataReader mySqlDataReader = null;
-            if (this.OpenConnection() == true)
+            if (this.OpenConnection())
             {
-
-                //Execute command
                 mySqlCommand.Connection = this.connection;
-                mySqlDataReader = mySqlCommand.ExecuteReader();
-
+                // CommandBehavior.CloseConnection cierra la conexión al cerrar el reader
+                mySqlDataReader = mySqlCommand.ExecuteReader(CommandBehavior.CloseConnection);
+                openConnection = false;
             }
             return mySqlDataReader;
         }
-        public DataTable getDataTable(MySqlCommand mySqlCommand)
+
+        // SELECT → devuelve DataTable (más cómodo para DataGrids)
+        public DataTable GetDataTable(MySqlCommand mySqlCommand)
         {
             DataTable dt = new DataTable();
-            mySqlCommand.Connection = this.connection;
-            MySqlDataAdapter myAdapter = new MySqlDataAdapter(mySqlCommand);
-            myAdapter.Fill(dt);
+            if (this.OpenConnection())
+            {
+                mySqlCommand.Connection = this.connection;
+                MySqlDataAdapter adapter = new MySqlDataAdapter(mySqlCommand);
+                adapter.Fill(dt);
+                this.Close();
+            }
             return dt;
         }
 
+        // Verificar si la conexión está activa
+        public bool IsConnected()
+        {
+            return connection != null && connection.State == ConnectionState.Open;
+        }
     }
 }
