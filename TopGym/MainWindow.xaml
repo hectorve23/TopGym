@@ -21,8 +21,17 @@
         <Border Background="#FF167751" Grid.Column="1">
             <StackPanel Margin="54,0,0,0" VerticalAlignment="Center" Height="285" Orientation="Vertical" >
                 <TextBlock Text="Iniciar sesion" FontSize="25" Foreground="White" Style="{StaticResource HeaderStyle}"/>
-                <Button Content="Registrarse" Margin="0,80,90,20" Height="37" Width="128" Click="Registro_Click"/>
-                <Button Content="Iniciar sesión" Margin="0,0,90,0" Height="57" Width="287" Click="IniciarSesion_Click"/>
+                <Button Content="Registrarse" Margin="0,80,90,20" Height="51" Width="159" Click="Registro_Click" RenderTransformOrigin="0.5,0.5">
+                    <Button.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="0.225"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Button.RenderTransform>
+                </Button>
+                <Button Content="Iniciar sesión" Margin="0,0,90,0" Height="52" Width="164" Click="IniciarSesion_Click"/>
             </StackPanel>
         </Border>
         <Border Background="#FF167751" Grid.Row="1" Grid.ColumnSpan="2">

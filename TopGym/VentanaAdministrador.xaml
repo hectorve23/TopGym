@@ -1,0 +1,501 @@
+﻿<Window x:Class="TopGym.VentanaAdministrador"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TopGym"
+        mc:Ignorable="d"
+        Title="TopGym - Panel de Administración" Height="700" Width="1100"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <!-- Estilo boton principal -->
+        <Style x:Key="MainButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#FF167751"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Margin" Value="0,5,0,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6"
+                                Padding="12,0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF0C5639"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo boton eliminar -->
+        <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource MainButtonStyle}">
+            <Setter Property="Background" Value="#BF1C1C"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#8B0000"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Estilo botón ver usuarios -->
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource MainButtonStyle}">
+            <Setter Property="Background" Value="#2E7D9A"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1A5F7A"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Estilo TextBlock cabecera -->
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <!-- Estilo TextBox -->
+        <Style x:Key="InputStyle" TargetType="TextBox">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="0,4,0,4"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="#FF167751"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+
+        <!-- Estilo ComboBox -->
+        <Style x:Key="ComboStyle" TargetType="ComboBox">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="0,4,0,4"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="#FF167751"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+
+        <!-- Estilo Label -->
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#CCFFFFFF"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,6,0,2"/>
+        </Style>
+
+        <!-- Estilo DataGrid -->
+        <Style x:Key="GridStyle" TargetType="DataGrid">
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#F0FFF8"/>
+            <Setter Property="BorderBrush" Value="#FF167751"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#DDDDDD"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!--SIDEBAR IZQUIERDO -->
+        <Border Background="#FF0C5639" Grid.Column="0">
+            <DockPanel>
+                <!-- Logo y titulo -->
+                <StackPanel DockPanel.Dock="Top" Margin="16,24,16,30">
+                    <Image Source="/img/logo.png" Height="70" Stretch="Uniform" Margin="0,0,0,12"/>
+                    <TextBlock Text="TopGym" FontSize="22" FontWeight="Bold"
+                               Foreground="White" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Panel Administrador" FontSize="11"
+                               Foreground="#AAFFFFFF" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <!-- Separador -->
+                <Separator DockPanel.Dock="Top" Background="#FF167751" Margin="16,0,16,16"/>
+
+                <!-- Botones de navegacion -->
+                <StackPanel DockPanel.Dock="Top" Margin="12,0">
+                    <Button Content="🏋  Actividades Dirigidas"
+                            Style="{StaticResource MainButtonStyle}"
+                            HorizontalContentAlignment="Left"
+                            Padding="14,0"
+                            Click="NavActividades_Click"/>
+                    <Button Content="📋  Informes"
+                            Style="{StaticResource MainButtonStyle}"
+                            HorizontalContentAlignment="Left"
+                            Padding="14,0"
+                            Click="NavInformes_Click"/>
+                </StackPanel>
+
+                <!-- Cerrar sesion abajo -->
+                <Button DockPanel.Dock="Bottom"
+                        Content="⬅  Cerrar sesión"
+                        Style="{StaticResource DangerButtonStyle}"
+                        Margin="12,0,12,20"
+                        HorizontalContentAlignment="Left"
+                        Padding="14,0"
+                        Click="CerrarSesion_Click"/>
+            </DockPanel>
+        </Border>
+
+        <!--CONTENIDO PRINCIPAL-->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Cabecera superior -->
+            <Border Background="#FF167751" Grid.Row="0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0">
+                    <TextBlock x:Name="PageTitle" Text="Actividades Dirigidas"
+                               FontSize="22" FontWeight="Bold" Foreground="White"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Panel con pestañas -->
+            <TabControl Grid.Row="1" Background="#FFF5F5F5"
+                        BorderThickness="0"
+                        x:Name="MainTabControl">
+
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Background" Value="#FF0C5639"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontSize" Value="13"/>
+                        <Setter Property="Padding" Value="16,8"/>
+                    </Style>
+                </TabControl.Resources>
+                
+                <!--PESTAÑA ACTIVIDADES -->
+                <TabItem Header="Actividades Dirigidas" x:Name="TabActividades">
+                    <Grid Margin="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="300"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Formulario -->
+                        <Border Background="#FF0C5639" CornerRadius="10"
+                                Padding="20" Margin="0,0,12,0"
+                                Grid.Column="0">
+                            <StackPanel>
+                                <TextBlock Text="Gestionar Actividad"
+                                           Style="{StaticResource SectionHeaderStyle}"
+                                           FontSize="18"/>
+                                <Separator Background="#FF167751" Margin="0,0,0,12"/>
+
+                                <TextBlock Text="Nombre de la actividad" Style="{StaticResource LabelStyle}"/>
+                                <TextBox x:Name="TxtNombreActividad" Style="{StaticResource InputStyle}"/>
+
+                                <TextBlock Text="Descripción" Style="{StaticResource LabelStyle}"/>
+                                <TextBox x:Name="TxtDescripcion" Style="{StaticResource InputStyle}"
+                                         Height="64" AcceptsReturn="True" TextWrapping="Wrap"
+                                         VerticalScrollBarVisibility="Auto"/>
+
+                                <TextBlock Text="Monitor / Instructor" Style="{StaticResource LabelStyle}"/>
+                                <TextBox x:Name="TxtMonitor" Style="{StaticResource InputStyle}"/>
+
+                                <TextBlock Text="Capacidad máxima" Style="{StaticResource LabelStyle}"/>
+                                <TextBox x:Name="TxtCapacidad" Style="{StaticResource InputStyle}"/>
+
+                                <TextBlock Text="Horario" Style="{StaticResource LabelStyle}"/>
+                                <TextBox x:Name="TxtHorario" Style="{StaticResource InputStyle}"/>
+
+                                <TextBlock Text="Categoría" Style="{StaticResource LabelStyle}"/>
+                                <ComboBox x:Name="CmbCategoria" Style="{StaticResource ComboStyle}">
+                                    <ComboBoxItem Content="Cardio"/>
+                                    <ComboBoxItem Content="Fuerza"/>
+                                    <ComboBoxItem Content="Flexibilidad"/>
+                                    <ComboBoxItem Content="Mente y cuerpo"/>
+                                    <ComboBoxItem Content="Aqua fitness"/>
+                                    <ComboBoxItem Content="Otro"/>
+                                </ComboBox>
+
+                                <Separator Background="#FF167751" Margin="0,14,0,10"/>
+
+                                <!-- Botones CRUD -->
+                                <Button Content="Crear actividad"
+                                        Style="{StaticResource MainButtonStyle}"
+                                        Click="CrearActividad_Click"/>
+                                <Button Content="Guardar cambios"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Click="EditarActividad_Click"/>
+                                <Button Content="Eliminar actividad"
+                                        Style="{StaticResource DangerButtonStyle}"
+                                        Click="EliminarActividad_Click"/>
+                                <Button Content="Limpiar formulario"
+                                        Style="{StaticResource MainButtonStyle}"
+                                        Background="#555555"
+                                        Click="LimpiarFormulario_Click"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Panel derecho: Lista de actividades + usuarios apuntados -->
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="12"/>
+                                <RowDefinition Height="220"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Tabla de actividades -->
+                            <Border Background="White" CornerRadius="10"
+                                    Grid.Row="0" Padding="16">
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal"
+                                                Margin="0,0,0,10">
+                                        <TextBlock Text="Listado de actividades"
+                                                   FontSize="16" FontWeight="Bold"
+                                                   Foreground="#FF0C5639"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBox x:Name="TxtBuscarActividad"
+                                                 Width="200" Height="30" Margin="20,0,0,0"
+                                                 Padding="8,4" FontSize="12"
+                                                 BorderBrush="#FF167751" BorderThickness="2"
+                                                 TextChanged="BuscarActividad_TextChanged"/>
+                                    </StackPanel>
+
+                                    <DataGrid x:Name="DgActividades"
+                                              Style="{StaticResource GridStyle}"
+                                              SelectionChanged="DgActividades_SelectionChanged">
+                                        <DataGrid.ColumnHeaderStyle>
+                                            <Style TargetType="DataGridColumnHeader">
+                                                <Setter Property="Background" Value="#FF167751"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                <Setter Property="Padding" Value="10,6"/>
+                                                <Setter Property="FontSize" Value="13"/>
+                                            </Style>
+                                        </DataGrid.ColumnHeaderStyle>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="ID"        Binding="{Binding IdActividad}" Width="50"/>
+                                            <DataGridTextColumn Header="Nombre"    Binding="{Binding Nombre}"      Width="*"/>
+                                            <DataGridTextColumn Header="Monitor"   Binding="{Binding Monitor}"     Width="140"/>
+                                            <DataGridTextColumn Header="Categoría" Binding="{Binding Categoria}"   Width="120"/>
+                                            <DataGridTextColumn Header="Horario"   Binding="{Binding Horario}"     Width="160"/>
+                                            <DataGridTextColumn Header="Plazas"    Binding="{Binding Capacidad}"   Width="70"/>
+                                            <DataGridTextColumn Header="Apuntados" Binding="{Binding Apuntados}"   Width="80"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </DockPanel>
+                            </Border>
+
+                            <!-- Tabla de usuarios apuntados en la actividad seleccionada -->
+                            <Border Background="White" CornerRadius="10"
+                                    Grid.Row="2" Padding="16">
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal"
+                                                Margin="0,0,0,10">
+                                        <TextBlock Text="Usuarios apuntados en: "
+                                                   FontSize="15" FontWeight="Bold"
+                                                   Foreground="#FF0C5639"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="TxtActividadSeleccionada"
+                                                   Text="(ninguna seleccionada)"
+                                                   FontSize="15" FontStyle="Italic"
+                                                   Foreground="#FF167751"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <DataGrid x:Name="DgUsuariosActividad"
+                                              Style="{StaticResource GridStyle}">
+                                        <DataGrid.ColumnHeaderStyle>
+                                            <Style TargetType="DataGridColumnHeader">
+                                                <Setter Property="Background" Value="#FF0C5639"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                <Setter Property="Padding" Value="10,6"/>
+                                                <Setter Property="FontSize" Value="13"/>
+                                            </Style>
+                                        </DataGrid.ColumnHeaderStyle>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="ID Usuario" Binding="{Binding IdUsuario}"  Width="80"/>
+                                            <DataGridTextColumn Header="Nombre"     Binding="{Binding Nombre}"     Width="*"/>
+                                            <DataGridTextColumn Header="Apellidos"  Binding="{Binding Apellidos}"  Width="*"/>
+                                            <DataGridTextColumn Header="Email"      Binding="{Binding Email}"      Width="180"/>
+                                            <DataGridTextColumn Header="Teléfono"   Binding="{Binding Telefono}"   Width="110"/>
+                                            <DataGridTextColumn Header="F. Alta"    Binding="{Binding FechaAlta}"  Width="100"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </DockPanel>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+                
+                <!-- PESTAÑA INFORMES-->
+                <TabItem Header="Informes" x:Name="TabInformes">
+                    <Grid Margin="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!--Configuracion del informe -->
+                        <Border Background="#FF0C5639" CornerRadius="10"
+                                Padding="20" Margin="0,0,12,0"
+                                Grid.Column="0">
+                            <StackPanel>
+                                <TextBlock Text="Crear informe"
+                                           Style="{StaticResource SectionHeaderStyle}"
+                                           FontSize="18"/>
+                                <Separator Background="#FF167751" Margin="0,0,0,12"/>
+
+                                <TextBlock Text="Tipo de informe" Style="{StaticResource LabelStyle}"/>
+                                <ComboBox x:Name="CmbTipoInforme" Style="{StaticResource ComboStyle}"
+                                          SelectionChanged="CmbTipoInforme_SelectionChanged">
+                                    <ComboBoxItem Content="Actividades por ocupación"/>
+                                    <ComboBoxItem Content="Usuarios por actividad"/>
+                                    <ComboBoxItem Content="Actividades sin plazas"/>
+                                    <ComboBoxItem Content="Resumen general del gimnasio"/>
+                                    <ComboBoxItem Content="Actividades por categoría"/>
+                                </ComboBox>
+
+                                <TextBlock Text="Fecha desde" Style="{StaticResource LabelStyle}"/>
+                                <DatePicker x:Name="DpFechaDesde"
+                                            Height="32" Margin="0,4,0,4"
+                                            FontSize="13"
+                                            BorderBrush="#FF167751"
+                                            BorderThickness="2"/>
+
+                                <TextBlock Text="Fecha hasta" Style="{StaticResource LabelStyle}"/>
+                                <DatePicker x:Name="DpFechaHasta"
+                                            Height="32" Margin="0,4,0,4"
+                                            FontSize="13"
+                                            BorderBrush="#FF167751"
+                                            BorderThickness="2"/>
+
+                                <TextBlock Text="Filtrar por categoría" Style="{StaticResource LabelStyle}"/>
+                                <ComboBox x:Name="CmbFiltroCategoria" Style="{StaticResource ComboStyle}">
+                                    <ComboBoxItem Content="Todas"/>
+                                    <ComboBoxItem Content="Cardio"/>
+                                    <ComboBoxItem Content="Fuerza"/>
+                                    <ComboBoxItem Content="Flexibilidad"/>
+                                    <ComboBoxItem Content="Mente y cuerpo"/>
+                                    <ComboBoxItem Content="Aqua fitness"/>
+                                </ComboBox>
+
+                                <Separator Background="#FF167751" Margin="0,14,0,10"/>
+
+                                <Button Content="📊  Generar informe"
+                                        Style="{StaticResource MainButtonStyle}"
+                                        Click="GenerarInforme_Click"/>
+                                <Button Content="💾  Exportar a PDF"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Click="ExportarPDF_Click"/>
+                                <Button Content="📄  Exportar a Excel"
+                                        Style="{StaticResource MainButtonStyle}"
+                                        Background="#1D6A2E"
+                                        Click="ExportarExcel_Click"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!--Visualizacion del informe -->
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="12"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Tarjetas resumen -->
+                            <UniformGrid Grid.Row="0" Rows="1" Margin="0,0,0,12">
+                                <!-- Card 1 -->
+                                <Border Background="#FF167751" CornerRadius="10"
+                                        Margin="0,0,8,0" Padding="16,12">
+                                    <StackPanel>
+                                        <TextBlock Text="Total Actividades" Foreground="#CCFFFFFF" FontSize="12"/>
+                                        <TextBlock x:Name="CardTotalActividades" Text="0"
+                                                   Foreground="White" FontSize="32" FontWeight="Bold"/>
+                                    </StackPanel>
+                                </Border>
+                                <!-- Card 2 -->
+                                <Border Background="#FF0C5639" CornerRadius="10"
+                                        Margin="4,0,4,0" Padding="16,12">
+                                    <StackPanel>
+                                        <TextBlock Text="Total Usuarios" Foreground="#CCFFFFFF" FontSize="12"/>
+                                        <TextBlock x:Name="CardTotalUsuarios" Text="0"
+                                                   Foreground="White" FontSize="32" FontWeight="Bold"/>
+                                    </StackPanel>
+                                </Border>
+                                <!-- Card 3 -->
+                                <Border Background="#2E7D9A" CornerRadius="10"
+                                        Margin="8,0,0,0" Padding="16,12">
+                                    <StackPanel>
+                                        <TextBlock Text="Ocupación media" Foreground="#CCFFFFFF" FontSize="12"/>
+                                        <TextBlock x:Name="CardOcupacionMedia" Text="0%"
+                                                   Foreground="White" FontSize="32" FontWeight="Bold"/>
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+
+                            <!-- Tabla del informe -->
+                            <Border Background="White" CornerRadius="10"
+                                    Grid.Row="1" Padding="16">
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal"
+                                                Margin="0,0,0,10">
+                                        <TextBlock x:Name="TxtTituloInforme"
+                                                   Text="Selecciona un tipo de informe y pulsa Generar"
+                                                   FontSize="15" FontWeight="Bold"
+                                                   Foreground="#FF0C5639"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <DataGrid x:Name="DgInforme" Style="{StaticResource GridStyle}">
+                                        <DataGrid.ColumnHeaderStyle>
+                                            <Style TargetType="DataGridColumnHeader">
+                                                <Setter Property="Background" Value="#FF167751"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                <Setter Property="Padding" Value="10,6"/>
+                                                <Setter Property="FontSize" Value="13"/>
+                                            </Style>
+                                        </DataGrid.ColumnHeaderStyle>
+                                    </DataGrid>
+                                </DockPanel>
+                            </Border>
+
+                            <!-- Area de notas del informe -->
+                            <Border Background="White" CornerRadius="10"
+                                    Grid.Row="3" Padding="16" Margin="0,0,0,0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Top"
+                                               Text="Observaciones del informe"
+                                               FontSize="14" FontWeight="Bold"
+                                               Foreground="#FF0C5639" Margin="0,0,0,8"/>
+                                    <TextBox x:Name="TxtObservaciones"
+                                             Height="80" AcceptsReturn="True"
+                                             TextWrapping="Wrap"
+                                             VerticalScrollBarVisibility="Auto"
+                                             FontSize="13"
+                                             BorderBrush="#FF167751"
+                                             BorderThickness="2"
+                                             Padding="8"/>
+                                </DockPanel>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </Grid>
+</Window>
