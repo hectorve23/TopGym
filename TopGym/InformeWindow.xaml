@@ -1,0 +1,21 @@
+﻿<Window x:Class="TopGym.InformeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Informe de Actividades" Height="250" Width="500"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+
+    <Grid Background="#FFF4F4F4">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="350">
+
+            <TextBlock Text="📊 Informe de Actividades" FontSize="22" FontWeight="Bold"
+                       Foreground="#FF0C5639" HorizontalAlignment="Center" Margin="0,0,0,30"/>
+
+            <TextBlock Text="Genera e imprime el informe de actividades del gimnasio."
+                       FontSize="13" Foreground="Gray" TextAlignment="Center" Margin="0,0,0,30"/>
+
+            <Button Content="🖨️ Imprimir informe" Height="45"
+                    Background="#FF167751" Foreground="White" BorderThickness="0"
+                    FontSize="14" Click="Imprimir_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

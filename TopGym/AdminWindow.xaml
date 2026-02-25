@@ -1,0 +1,134 @@
+﻿<Window x:Class="TopGym.AdminWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TopGym - Panel Administrador" Height="600" Width="1000"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- MENU LATERAL -->
+        <Border Background="#FF0C5639" Grid.Column="0">
+            <StackPanel VerticalAlignment="Top" Margin="0,30,0,0">
+                <TextBlock Text="TopGym" FontSize="24" Foreground="White"
+                           HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                <TextBlock Text="Panel Administrador" FontSize="11" Foreground="#FFAAD4C8"
+                           HorizontalAlignment="Center" Margin="0,0,0,30"/>
+
+                <Button Content="Gestionar Actividades" Height="50" Margin="10,5"
+                        Background="#FF167751" Foreground="White" BorderThickness="0"
+                        FontSize="13" Click="VerActividades_Click"/>
+
+                <Button Content="Ver Inscritos" Height="50" Margin="10,5"
+                        Background="#FF167751" Foreground="White" BorderThickness="0"
+                        FontSize="13" Click="VerInscritos_Click"/>
+
+                <Button Content="Informes" Height="50" Margin="10,5"
+                        Background="#FF167751" Foreground="White" BorderThickness="0"
+                        FontSize="13" Click="VerInformes_Click"/>
+
+                <Button Content="Cerrar sesión" Height="50" Margin="10,80,10,5"
+                        Background="#FF8B0000" Foreground="White" BorderThickness="0"
+                        FontSize="13" Click="CerrarSesion_Click"/>
+            </StackPanel>
+        </Border>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <Grid Grid.Column="1" Background="#FFF4F4F4">
+
+            <!-- PANEL GESTIONAR ACTIVIDADES -->
+            <StackPanel x:Name="panelActividades" Margin="20" Visibility="Visible">
+                <TextBlock Text="Gestionar Actividades" FontSize="22" FontWeight="Bold"
+                           Foreground="#FF0C5639" Margin="0,0,0,15"/>
+
+                <DataGrid x:Name="dgActividades" AutoGenerateColumns="False" IsReadOnly="True"
+                          Height="250" Margin="0,0,0,15" CanUserResizeRows="False"
+                          SelectionMode="Single" GridLinesVisibility="Horizontal"
+                          SelectionChanged="DgActividades_SelectionChanged">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="150"/>
+                        <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="180"/>
+                        <DataGridTextColumn Header="Horario" Binding="{Binding Horario}" Width="120"/>
+                        <DataGridTextColumn Header="Plazas totales" Binding="{Binding PlazasTotal}" Width="100"/>
+                        <DataGridTextColumn Header="Plazas libres" Binding="{Binding PlazasLibres}" Width="100"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- FORMULARIO -->
+                <Border Background="White" CornerRadius="6" Padding="15" Margin="0,0,0,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,10,10">
+                            <TextBlock Text="Nombre" FontSize="12" Foreground="Gray"/>
+                            <TextBox x:Name="txtNombre" Height="32" Padding="5,4" FontSize="13"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="0" Margin="0,0,0,10">
+                            <TextBlock Text="Horario" FontSize="12" Foreground="Gray"/>
+                            <TextBox x:Name="txtHorario" Height="32" Padding="5,4" FontSize="13"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,0,10,10">
+                            <TextBlock Text="Descripción" FontSize="12" Foreground="Gray"/>
+                            <TextBox x:Name="txtDescripcion" Height="32" Padding="5,4" FontSize="13"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="1" Margin="0,0,0,10">
+                            <TextBlock Text="Plazas totales" FontSize="12" Foreground="Gray"/>
+                            <TextBox x:Name="txtPlazas" Height="32" Padding="5,4" FontSize="13"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Horizontal" Margin="0,5,0,0">
+                            <Button Content="Añadir" Height="38" Width="110" Margin="0,0,10,0"
+                                    Background="#FF167751" Foreground="White" BorderThickness="0"
+                                    FontSize="13" Click="Añadir_Click"/>
+                            <Button Content="Editar" Height="38" Width="110" Margin="0,0,10,0"
+                                    Background="#FF1A6B9A" Foreground="White" BorderThickness="0"
+                                    FontSize="13" Click="Editar_Click"/>
+                            <Button Content="Eliminar" Height="38" Width="110"
+                                    Background="#FF8B0000" Foreground="White" BorderThickness="0"
+                                    FontSize="13" Click="Eliminar_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <!-- PANEL INSCRITOS -->
+            <StackPanel x:Name="panelInscritos" Margin="20" Visibility="Collapsed">
+                <TextBlock Text="Usuarios inscritos por actividad" FontSize="22" FontWeight="Bold"
+                           Foreground="#FF0C5639" Margin="0,0,0,15"/>
+
+                <TextBlock Text="Selecciona una actividad:" FontSize="13" Margin="0,0,0,8"/>
+                <ComboBox x:Name="cmbActividades" Height="35" FontSize="13" Margin="0,0,0,15"
+                          SelectionChanged="CmbActividades_SelectionChanged"/>
+
+                <DataGrid x:Name="dgInscritos" AutoGenerateColumns="False" IsReadOnly="True"
+                          Height="350" CanUserResizeRows="False" GridLinesVisibility="Horizontal">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nombre de usuario" Binding="{Binding Nombre}" Width="200"/>
+                        <DataGridTextColumn Header="Rol" Binding="{Binding Rol}" Width="150"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+
+            <!-- PANEL INFORMES -->
+            <StackPanel x:Name="panelInformes" Margin="20" Visibility="Collapsed">
+                <TextBlock Text="Informes" FontSize="22" FontWeight="Bold"
+                           Foreground="#FF0C5639" Margin="0,0,0,15"/>
+            </StackPanel>
+
+        </Grid>
+    </Grid>
+</Window>
