@@ -53,30 +53,23 @@ namespace TopGym
             panelPlanes.Visibility = Visibility.Visible;
         }
 
-        /// <summary>
-        /// Actualiza la vista con datos frescos de la base de datos
-        /// </summary>
+        /// Actualiza la vista con la base de datos
         private void ActualizarVista()
         {
-            // Recargar actividades desde la base de datos
             RecargarActividadesDesdeBaseDatos();
-
-            // Recargar las actividades del usuario actual
             RecargarActividadesUsuario();
 
             // Actualizar el DataGrid
             dgActividades.ItemsSource = null;
             dgActividades.ItemsSource = Actividades;
 
-            // Actualizar la lista de "Mis Actividades"
+            // Actualizar la lista de actividades
             lstMisActividades.Items.Clear();
             foreach (var act in usuarioActual.ActividadesInscritas)
                 lstMisActividades.Items.Add($"{act.Nombre} — {act.Horario}");
         }
 
-        /// <summary>
         /// Recarga todas las actividades desde la base de datos
-        /// </summary>
         private void RecargarActividadesDesdeBaseDatos()
         {
             try
@@ -100,9 +93,7 @@ namespace TopGym
             }
         }
 
-        /// <summary>
         /// Recarga las actividades inscritas del usuario actual
-        /// </summary>
         private void RecargarActividadesUsuario()
         {
             try
@@ -131,7 +122,7 @@ namespace TopGym
                 return;
             }
 
-            // Verificar si ya está inscrito (verificar en la base de datos)
+            // Verificar si ya esta inscrito 
             if (usuarioActual.ActividadesInscritas.Any(a => a.IdActividad == seleccionada.IdActividad))
             {
                 MessageBox.Show("Ya estás apuntado a esta actividad", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -155,7 +146,7 @@ namespace TopGym
                 ActualizarVista(); // Recargar datos
                 MessageBox.Show($"Te has apuntado a {seleccionada.Nombre}", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-            // Si falla, DatabaseConnection ya muestra el mensaje de error
+            // Si falla DatabaseConnection muestra el mensaje de error
         }
 
         private void DarmeDeBaja_Click(object sender, RoutedEventArgs e)
@@ -167,7 +158,7 @@ namespace TopGym
                 return;
             }
 
-            // Verificar si está inscrito
+            // Verificar si esta inscrito
             if (!usuarioActual.ActividadesInscritas.Any(a => a.IdActividad == seleccionada.IdActividad))
             {
                 MessageBox.Show("No estás apuntado a esta actividad.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);

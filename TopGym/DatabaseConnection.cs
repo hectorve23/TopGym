@@ -8,17 +8,10 @@ using System.Windows;
 
 namespace TopGym
 {
-    /// <summary>
-    /// Clase para gestionar la conexión y operaciones con la base de datos MySQL
-    /// </summary>
     public class DatabaseConnection
     {
-        // Cadena de conexión a la base de datos
         private static string connectionString = "Server=localhost;Database=TopGymDB;Uid=root;Pwd=root;";
 
-        /// <summary>
-        /// Obtiene una nueva conexión a la base de datos
-        /// </summary>
         private static MySqlConnection GetConnection()
         {
             try
@@ -29,14 +22,11 @@ namespace TopGym
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al conectar con la base de datos: {ex.Message}",
-                    "Error de Conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "Error de Conexion", MessageBoxButton.OK, MessageBoxImage.Error);
                 return null;
             }
         }
 
-        /// <summary>
-        /// Prueba la conexión a la base de datos
-        /// </summary>
         public static bool ProbarConexion()
         {
             try
@@ -59,11 +49,8 @@ namespace TopGym
             }
         }
 
-        #region Métodos para USUARIOS
 
-        /// <summary>
         /// Inserta un nuevo usuario en la base de datos
-        /// </summary>
         public static bool InsertarUsuario(string nombre, string contrasena, string rol)
         {
             try
@@ -102,9 +89,7 @@ namespace TopGym
             }
         }
 
-        /// <summary>
         /// Obtiene todos los usuarios de la base de datos
-        /// </summary>
         public static List<Usuario> ObtenerTodosUsuarios()
         {
             List<Usuario> usuarios = new List<Usuario>();
@@ -144,9 +129,7 @@ namespace TopGym
             return usuarios;
         }
 
-        /// <summary>
         /// Valida las credenciales de un usuario
-        /// </summary>
         public static Usuario ValidarUsuario(string nombre, string contrasena)
         {
             try
@@ -188,9 +171,7 @@ namespace TopGym
             return null;
         }
 
-        /// <summary>
         /// Actualiza un usuario existente
-        /// </summary>
         public static bool ActualizarUsuario(int idUsuario, string nombre, string contrasena, string rol)
         {
             try
@@ -222,9 +203,7 @@ namespace TopGym
             }
         }
 
-        /// <summary>
         /// Elimina un usuario de la base de datos
-        /// </summary>
         public static bool EliminarUsuario(int idUsuario)
         {
             try
@@ -253,13 +232,11 @@ namespace TopGym
             }
         }
 
-        #endregion
 
-        #region Métodos para ACTIVIDADES
 
-        /// <summary>
+
+
         /// Inserta una nueva actividad en la base de datos
-        /// </summary>
         public static bool InsertarActividad(string nombre, string descripcion, string horario, int plazasTotal)
         {
             try
@@ -291,9 +268,7 @@ namespace TopGym
             }
         }
 
-        /// <summary>
         /// Obtiene todas las actividades de la base de datos
-        /// </summary>
         public static List<Actividad> ObtenerTodasActividades()
         {
             List<Actividad> actividades = new List<Actividad>();
@@ -334,9 +309,7 @@ namespace TopGym
             return actividades;
         }
 
-        /// <summary>
         /// Actualiza una actividad existente
-        /// </summary>
         public static bool ActualizarActividad(int idActividad, string nombre, string descripcion, string horario, int plazasTotal)
         {
             try
@@ -369,9 +342,7 @@ namespace TopGym
             }
         }
 
-        /// <summary>
         /// Elimina una actividad de la base de datos
-        /// </summary>
         public static bool EliminarActividad(int idActividad)
         {
             try
@@ -400,13 +371,11 @@ namespace TopGym
             }
         }
 
-        #endregion
 
-        #region Métodos para INSCRIPCIONES (UsuarioActividad)
 
-        /// <summary>
+      
+
         /// Inscribe un usuario en una actividad
-        /// </summary>
         public static bool InscribirUsuarioEnActividad(int idUsuario, int idActividad)
         {
             try
@@ -445,7 +414,7 @@ namespace TopGym
                         }
                     }
 
-                    // Insertar la inscripción
+                    // Insertar la inscripcion
                     string query = "INSERT INTO UsuarioActividad (IdUsuario, IdActividad) VALUES (@idUsuario, @idActividad)";
 
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
@@ -460,9 +429,9 @@ namespace TopGym
             }
             catch (MySqlException ex)
             {
-                if (ex.Number == 1062) // Duplicate entry
+                if (ex.Number == 1062) 
                 {
-                    MessageBox.Show("El usuario ya está inscrito en esta actividad.",
+                    MessageBox.Show("El usuario ya esta inscrito en esta actividad.",
                         "Aviso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
@@ -474,9 +443,7 @@ namespace TopGym
             }
         }
 
-        /// <summary>
         /// Desinscribe un usuario de una actividad
-        /// </summary>
         public static bool DesinscribirUsuarioDeActividad(int idUsuario, int idActividad)
         {
             try
@@ -506,9 +473,7 @@ namespace TopGym
             }
         }
 
-        /// <summary>
-        /// Obtiene todas las actividades en las que está inscrito un usuario
-        /// </summary>
+        /// Obtiene todas las actividades en las que esta inscrito un usuario
         public static List<Actividad> ObtenerActividadesDeUsuario(int idUsuario)
         {
             List<Actividad> actividades = new List<Actividad>();
@@ -556,9 +521,7 @@ namespace TopGym
             return actividades;
         }
 
-        /// <summary>
         /// Obtiene todos los usuarios inscritos en una actividad
-        /// </summary>
         public static List<Usuario> ObtenerUsuariosDeActividad(int idActividad)
         {
             List<Usuario> usuarios = new List<Usuario>();
@@ -604,8 +567,6 @@ namespace TopGym
 
             return usuarios;
         }
-
-        #endregion
     }
 }
 

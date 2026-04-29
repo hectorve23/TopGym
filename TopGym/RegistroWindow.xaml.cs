@@ -55,7 +55,7 @@ namespace TopGym
                     "Registro completado", MessageBoxButton.OK, MessageBoxImage.Information);
                 this.Close();
             }
-            // Si falla, DatabaseConnection ya muestra el mensaje de error (ej: nombre duplicado)
+            // Si falla DatabaseConnection muestra el mensaje de error 
         }
 
         private void Cancelar_Click(object sender, RoutedEventArgs e)

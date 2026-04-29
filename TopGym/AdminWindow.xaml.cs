@@ -48,9 +48,8 @@ namespace TopGym
             informeWin.ShowDialog();
         }
 
-        /// <summary>
+
         /// Actualiza la vista del DataGrid con los datos de la base de datos
-        /// </summary>
         private void ActualizarVista()
         {
             // Recargar actividades desde la base de datos para tener datos frescos
@@ -60,9 +59,8 @@ namespace TopGym
             dgActividades.ItemsSource = UsuarioWindow.Actividades;
         }
 
-        /// <summary>
+
         /// Recarga todas las actividades desde la base de datos
-        /// </summary>
         private void RecargarActividadesDesdeBaseDatos()
         {
             try
@@ -160,7 +158,7 @@ namespace TopGym
             if (!ValidarFormulario(out string nombre, out string descripcion, out string horario, out int plazas))
                 return;
 
-            // Validar que no se reduzcan las plazas por debajo del número de inscritos
+            // Validar que no se reduzcan las plazas por debajo del numero de inscritos
             int numeroInscritos = actividadSeleccionada.inscritos.Count;
             if (plazas < numeroInscritos)
             {
@@ -199,7 +197,7 @@ namespace TopGym
 
             if (resultado == MessageBoxResult.Yes)
             {
-                // Eliminar de la base de datos (las inscripciones se eliminan automáticamente por CASCADE)
+                // Eliminar de la base de datos (las inscripciones se eliminan automaticamente por CASCADE)
                 bool exito = DatabaseConnection.EliminarActividad(actividadSeleccionada.IdActividad);
 
                 if (exito)

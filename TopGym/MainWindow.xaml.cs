@@ -26,27 +26,21 @@ namespace TopGym
             InicializarAplicacion();
         }
 
-        /// <summary>
-        /// Inicializa la aplicación: prueba conexión y carga datos desde la base de datos
-        /// </summary>
+        /// Inicializa la aplicacion: prueba conexion y carga datos desde la base de datos
         private void InicializarAplicacion()
         {
-            // Probar la conexión a la base de datos
             if (!DatabaseConnection.ProbarConexion())
             {
-                MessageBox.Show("No se pudo conectar a la base de datos.\nAsegúrate de que MySQL esté ejecutándose y que la base de datos TopGymDB exista.",
-                    "Error de Conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("No se pudo conectar a la base de datos",
+                    "Error de Conexion", MessageBoxButton.OK, MessageBoxImage.Error);
                 this.Close();
                 return;
             }
 
-            // Cargar todos los datos desde la base de datos
             CargarDatosDesdeBaseDatos();
         }
 
-        /// <summary>
         /// Carga todos los usuarios y actividades desde la base de datos al iniciar la aplicación
-        /// </summary>
         private void CargarDatosDesdeBaseDatos()
         {
             try
@@ -59,7 +53,7 @@ namespace TopGym
                     usuarios.Add(usuario);
                 }
 
-                // Cargar actividades en la colección estática de UsuarioWindow
+                // Cargar actividades en la coleccion estatica de UsuarioWindow
                 UsuarioWindow.Actividades.Clear();
                 List<Actividad> actividadesBD = DatabaseConnection.ObtenerTodasActividades();
 
@@ -112,7 +106,7 @@ namespace TopGym
             List<Actividad> actividadesInscritas = DatabaseConnection.ObtenerActividadesDeUsuario(usuarioEncontrado.IdUsuario);
             usuarioEncontrado.ActividadesInscritas = new ObservableCollection<Actividad>(actividadesInscritas);
 
-            // Abrir la ventana correspondiente según el rol
+            // Abrir la ventana correspondiente segun el rol
             if (usuarioEncontrado.Rol == RolUsuario.Administrador)
             {
                 AdminWindow adminWin = new AdminWindow(usuarioEncontrado);
@@ -132,7 +126,7 @@ namespace TopGym
             RegistroWindow registro = new RegistroWindow();
             registro.ShowDialog();
 
-            // Recargar usuarios después del registro por si se creó uno nuevo
+            // Recargar usuarios despues del registro por si se creo uno nuevo
             CargarDatosDesdeBaseDatos();
         }
     }
