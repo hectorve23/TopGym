@@ -1,0 +1,34 @@
+DROP DATABASE IF EXISTS TopGymDB;
+CREATE DATABASE IF NOT EXISTS TopGymDB; 
+
+USE TopGymDB;
+
+CREATE TABLE Usuario (
+	IdUsuario INT AUTO_INCREMENT PRIMARY KEY,
+	Nombre VARCHAR(100) NOT NULL,
+	Contrasena VARCHAR(255) NOT NULL,
+	Rol VARCHAR(20) NOT NULL CHECK (Rol IN ('administrador', 'usuario'))
+);
+
+CREATE TABLE Actividad (
+	IdActividad INT AUTO_INCREMENT PRIMARY KEY,
+	Nombre VARCHAR(100) NOT NULL,
+	Descripcion VARCHAR(500),
+	Horario VARCHAR(100) NOT NULL,
+	PlazasTotal INT NOT NULL
+);
+ 
+CREATE TABLE UsuarioActividad (
+	IdUsuarioActividad INT AUTO_INCREMENT PRIMARY KEY,
+	IdUsuario INT NOT NULL,
+	IdActividad INT NOT NULL,
+	
+	-- Claves foráneas
+	CONSTRAINT FK_UsuarioActividad_Usuario 
+		FOREIGN KEY (IdUsuario) REFERENCES Usuario(IdUsuario) ON DELETE CASCADE,
+	CONSTRAINT FK_UsuarioActividad_Actividad 
+		FOREIGN KEY (IdActividad) REFERENCES Actividad(IdActividad) ON DELETE CASCADE
+);
+ 
+INSERT INTO Usuario (Nombre, Contrasena, Rol) 
+VALUES ('Admin', '1234', 'administrador');
