@@ -9,6 +9,7 @@ namespace TopGym
 {
     public class Actividad
     {
+        public int IdActividad { get; set; }
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
         public string Horario { get; set; }

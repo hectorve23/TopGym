@@ -28,22 +28,8 @@ namespace TopGym
             usuarioActual = usuario;
             txtBienvenida.Text = $"Hola, {usuario.Nombre}";
 
-            CargarActividadesPrueba();
             CargarPlanes();
             ActualizarVista();
-        }
-
-        //DATOS DE PRUEBA
-
-        private void CargarActividadesPrueba()
-        {
-            if (Actividades.Count == 0)
-            {
-                Actividades.Add(new Actividad { Nombre = "Yoga", Descripcion = "Relax y flexibilidad", Horario = "Lunes 10:00", PlazasTotal = 15 });
-                Actividades.Add(new Actividad { Nombre = "Spinning", Descripcion = "Cardio intenso en bici", Horario = "Martes 18:00", PlazasTotal = 20 });
-                Actividades.Add(new Actividad { Nombre = "Zumba", Descripcion = "Baile y diversión", Horario = "Miercoles 19:00", PlazasTotal = 25 });
-                Actividades.Add(new Actividad { Nombre = "Pilates", Descripcion = "Core y postura", Horario = "Viernes 11:00", PlazasTotal = 12 });
-            }
         }
 
         private void CargarPlanes()
@@ -67,14 +53,73 @@ namespace TopGym
             panelPlanes.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// Actualiza la vista con datos frescos de la base de datos
+        /// </summary>
         private void ActualizarVista()
         {
+            // Recargar actividades desde la base de datos
+            RecargarActividadesDesdeBaseDatos();
+
+            // Recargar las actividades del usuario actual
+            RecargarActividadesUsuario();
+
+            // Actualizar el DataGrid
             dgActividades.ItemsSource = null;
             dgActividades.ItemsSource = Actividades;
 
+            // Actualizar la lista de "Mis Actividades"
             lstMisActividades.Items.Clear();
             foreach (var act in usuarioActual.ActividadesInscritas)
                 lstMisActividades.Items.Add($"{act.Nombre} — {act.Horario}");
+        }
+
+        /// <summary>
+        /// Recarga todas las actividades desde la base de datos
+        /// </summary>
+        private void RecargarActividadesDesdeBaseDatos()
+        {
+            try
+            {
+                Actividades.Clear();
+                List<Actividad> actividadesBD = DatabaseConnection.ObtenerTodasActividades();
+
+                foreach (var actividad in actividadesBD)
+                {
+                    // Cargar los usuarios inscritos en cada actividad
+                    List<Usuario> inscritos = DatabaseConnection.ObtenerUsuariosDeActividad(actividad.IdActividad);
+                    actividad.inscritos = new ObservableCollection<Usuario>(inscritos);
+
+                    Actividades.Add(actividad);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al recargar actividades: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Recarga las actividades inscritas del usuario actual
+        /// </summary>
+        private void RecargarActividadesUsuario()
+        {
+            try
+            {
+                usuarioActual.ActividadesInscritas.Clear();
+                List<Actividad> actividadesUsuario = DatabaseConnection.ObtenerActividadesDeUsuario(usuarioActual.IdUsuario);
+
+                foreach (var act in actividadesUsuario)
+                {
+                    usuarioActual.ActividadesInscritas.Add(act);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al recargar tus actividades: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Apuntarme_Click(object sender, RoutedEventArgs e)
@@ -86,22 +131,31 @@ namespace TopGym
                 return;
             }
 
-            if (usuarioActual.ActividadesInscritas.Contains(seleccionada))
+            // Verificar si ya está inscrito (verificar en la base de datos)
+            if (usuarioActual.ActividadesInscritas.Any(a => a.IdActividad == seleccionada.IdActividad))
             {
-                MessageBox.Show("Ya estas apuntado a esta actividad", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Ya estás apuntado a esta actividad", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
+            // Verificar plazas disponibles
             if (seleccionada.PlazasLibres <= 0)
             {
                 MessageBox.Show("No quedan plazas disponibles", "Sin plazas", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            seleccionada.inscritos.Add(usuarioActual);
-            usuarioActual.ActividadesInscritas.Add(seleccionada);
-            ActualizarVista();
-            MessageBox.Show($"Te has apuntado a {seleccionada.Nombre}", "Exito", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Inscribir en la base de datos
+            bool resultado = DatabaseConnection.InscribirUsuarioEnActividad(
+                usuarioActual.IdUsuario,
+                seleccionada.IdActividad);
+
+            if (resultado)
+            {
+                ActualizarVista(); // Recargar datos
+                MessageBox.Show($"Te has apuntado a {seleccionada.Nombre}", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            // Si falla, DatabaseConnection ya muestra el mensaje de error
         }
 
         private void DarmeDeBaja_Click(object sender, RoutedEventArgs e)
@@ -113,9 +167,10 @@ namespace TopGym
                 return;
             }
 
-            if (!usuarioActual.ActividadesInscritas.Contains(seleccionada))
+            // Verificar si está inscrito
+            if (!usuarioActual.ActividadesInscritas.Any(a => a.IdActividad == seleccionada.IdActividad))
             {
-                MessageBox.Show("No estas apuntado a esta actividad.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("No estás apuntado a esta actividad.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -124,9 +179,16 @@ namespace TopGym
 
             if (resultado == MessageBoxResult.Yes)
             {
-                seleccionada.inscritos.Remove(usuarioActual);
-                usuarioActual.ActividadesInscritas.Remove(seleccionada);
-                ActualizarVista();
+                // Desinscribir de la base de datos
+                bool exito = DatabaseConnection.DesinscribirUsuarioDeActividad(
+                    usuarioActual.IdUsuario,
+                    seleccionada.IdActividad);
+
+                if (exito)
+                {
+                    ActualizarVista(); // Recargar datos
+                    MessageBox.Show("Te has dado de baja correctamente", "Hecho", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
         }
 
@@ -136,19 +198,19 @@ namespace TopGym
 
             switch (cmbCategoria.SelectedIndex)
             {
-                case 0: 
-                    lstPlanes.Items.Add("Día 1 — Pecho y triceps: Press banca 4x10, Fondos 3x12, Extensiones 3x15");
-                    lstPlanes.Items.Add("Día 2 — Espalda y biceps: Dominadas 4x8, Remo 4x10, Curl barra 3x12");
+                case 0:
+                    lstPlanes.Items.Add("Día 1 — Pecho y tríceps: Press banca 4x10, Fondos 3x12, Extensiones 3x15");
+                    lstPlanes.Items.Add("Día 2 — Espalda y bíceps: Dominadas 4x8, Remo 4x10, Curl barra 3x12");
                     lstPlanes.Items.Add("Día 3 — Piernas: Sentadilla 4x10, Prensa 3x12, Extensiones 3x15");
                     lstPlanes.Items.Add("Día 4 — Hombros: Press militar 4x10, Elevaciones laterales 3x15");
                     break;
-                case 1: 
+                case 1:
                     lstPlanes.Items.Add("Día 1 — Cinta: 30 min ritmo moderado (zona 2)");
                     lstPlanes.Items.Add("Día 2 — Bicicleta: 20 min HIIT (1 min fuerte / 1 min suave)");
-                    lstPlanes.Items.Add("Día 3 — Eliptica: 40 min ritmo constante");
+                    lstPlanes.Items.Add("Día 3 — Elíptica: 40 min ritmo constante");
                     lstPlanes.Items.Add("Día 4 — Remo: 15 min + saltar a la comba 10 min");
                     break;
-                case 2: 
+                case 2:
                     lstPlanes.Items.Add("Día 1 — Estiramientos globales: 45 min yoga básico");
                     lstPlanes.Items.Add("Día 2 — Movilidad cadera y columna: 30 min");
                     lstPlanes.Items.Add("Día 3 — Pilates suelo: Core y postura, 40 min");
@@ -159,8 +221,8 @@ namespace TopGym
 
         private void CerrarSesion_Click(object sender, RoutedEventArgs e)
         {
-            var resultado = MessageBox.Show("¿Seguro que quieres cerrar sesion?",
-                "Cerrar sesion", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var resultado = MessageBox.Show("¿Seguro que quieres cerrar sesión?",
+                "Cerrar sesión", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (resultado == MessageBoxResult.Yes)
             {

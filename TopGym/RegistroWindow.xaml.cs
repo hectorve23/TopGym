@@ -27,6 +27,7 @@ namespace TopGym
             string contrasena = txtPassword.Password;
             string confirmar = txtConfirmar.Password;
 
+            // Validaciones
             if (string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(contrasena) || string.IsNullOrEmpty(confirmar))
             {
                 MessageBox.Show("Por favor, rellena todos los campos", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -45,26 +46,16 @@ namespace TopGym
                 return;
             }
 
-            foreach (var u in MainWindow.usuarios)
+            // Intentar insertar el nuevo usuario en la base de datos
+            bool resultado = DatabaseConnection.InsertarUsuario(nombre, contrasena, "usuario");
+
+            if (resultado)
             {
-                if (u.Nombre.ToLower() == nombre.ToLower())
-                {
-                    MessageBox.Show("Ese nombre de usuario ya está en uso. Elige otro", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                MessageBox.Show("Cuenta creada con éxito. Ya puedes iniciar sesión",
+                    "Registro completado", MessageBoxButton.OK, MessageBoxImage.Information);
+                this.Close();
             }
-
-            var nuevoUsuario = new Usuario
-            {
-                Nombre = nombre,
-                Contrasena = contrasena,
-                Rol = RolUsuario.Usuario
-            };
-
-            MainWindow.usuarios.Add(nuevoUsuario);
-
-            MessageBox.Show("Cuenta creada con éxito. Ya puedes iniciar sesion", "Registro completado", MessageBoxButton.OK, MessageBoxImage.Information);
-            this.Close();
+            // Si falla, DatabaseConnection ya muestra el mensaje de error (ej: nombre duplicado)
         }
 
         private void Cancelar_Click(object sender, RoutedEventArgs e)

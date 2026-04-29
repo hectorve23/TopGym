@@ -48,11 +48,42 @@ namespace TopGym
             informeWin.ShowDialog();
         }
 
-
+        /// <summary>
+        /// Actualiza la vista del DataGrid con los datos de la base de datos
+        /// </summary>
         private void ActualizarVista()
         {
+            // Recargar actividades desde la base de datos para tener datos frescos
+            RecargarActividadesDesdeBaseDatos();
+
             dgActividades.ItemsSource = null;
             dgActividades.ItemsSource = UsuarioWindow.Actividades;
+        }
+
+        /// <summary>
+        /// Recarga todas las actividades desde la base de datos
+        /// </summary>
+        private void RecargarActividadesDesdeBaseDatos()
+        {
+            try
+            {
+                UsuarioWindow.Actividades.Clear();
+                List<Actividad> actividadesBD = DatabaseConnection.ObtenerTodasActividades();
+
+                foreach (var actividad in actividadesBD)
+                {
+                    // Cargar los usuarios inscritos en cada actividad
+                    List<Usuario> inscritos = DatabaseConnection.ObtenerUsuariosDeActividad(actividad.IdActividad);
+                    actividad.inscritos = new System.Collections.ObjectModel.ObservableCollection<Usuario>(inscritos);
+
+                    UsuarioWindow.Actividades.Add(actividad);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al recargar actividades: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void DgActividades_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -106,28 +137,16 @@ namespace TopGym
             if (!ValidarFormulario(out string nombre, out string descripcion, out string horario, out int plazas))
                 return;
 
-            // Comprobar que no exista ya una actividad con el mismo nombre
-            foreach (var act in UsuarioWindow.Actividades)
+            // Insertar en la base de datos
+            bool resultado = DatabaseConnection.InsertarActividad(nombre, descripcion, horario, plazas);
+
+            if (resultado)
             {
-                if (act.Nombre.ToLower() == nombre.ToLower())
-                {
-                    MessageBox.Show("Ya existe una actividad con ese nombre.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                LimpiarFormulario();
+                ActualizarVista();
+                MessageBox.Show($"Actividad '{nombre}' añadida correctamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-
-            var nueva = new Actividad
-            {
-                Nombre = nombre,
-                Descripcion = descripcion,
-                Horario = horario,
-                PlazasTotal = plazas
-            };
-
-            UsuarioWindow.Actividades.Add(nueva);
-            LimpiarFormulario();
-            ActualizarVista();
-            MessageBox.Show($"Actividad '{nombre}' añadida correctamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Si falla, DatabaseConnection ya muestra el mensaje de error
         }
 
         private void Editar_Click(object sender, RoutedEventArgs e)
@@ -141,21 +160,29 @@ namespace TopGym
             if (!ValidarFormulario(out string nombre, out string descripcion, out string horario, out int plazas))
                 return;
 
-            if (plazas < actividadSeleccionada.inscritos.Count)
+            // Validar que no se reduzcan las plazas por debajo del número de inscritos
+            int numeroInscritos = actividadSeleccionada.inscritos.Count;
+            if (plazas < numeroInscritos)
             {
-                MessageBox.Show($"No puedes reducir las plazas por debajo del número de inscritos ({actividadSeleccionada.inscritos.Count}).",
+                MessageBox.Show($"No puedes reducir las plazas por debajo del número de inscritos ({numeroInscritos}).",
                     "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            actividadSeleccionada.Nombre = nombre;
-            actividadSeleccionada.Descripcion = descripcion;
-            actividadSeleccionada.Horario = horario;
-            actividadSeleccionada.PlazasTotal = plazas;
+            // Actualizar en la base de datos
+            bool resultado = DatabaseConnection.ActualizarActividad(
+                actividadSeleccionada.IdActividad,
+                nombre,
+                descripcion,
+                horario,
+                plazas);
 
-            LimpiarFormulario();
-            ActualizarVista();
-            MessageBox.Show("Actividad actualizada correctamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (resultado)
+            {
+                LimpiarFormulario();
+                ActualizarVista();
+                MessageBox.Show("Actividad actualizada correctamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
         private void Eliminar_Click(object sender, RoutedEventArgs e)
@@ -167,24 +194,28 @@ namespace TopGym
             }
 
             var resultado = MessageBox.Show(
-                $"¿Seguro que quieres eliminar la actividad '{actividadSeleccionada.Nombre}'?\nSe dará de baja a todos los inscritos.",
+                $"¿Seguro que quieres eliminar la actividad '{actividadSeleccionada.Nombre}'?\nSe dará de baja a todos los inscritos automáticamente.",
                 "Confirmar eliminación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
             if (resultado == MessageBoxResult.Yes)
             {
-                // Quitar la actividad de todos los usuarios inscritos
-                foreach (var usuario in actividadSeleccionada.inscritos)
-                    usuario.ActividadesInscritas.Remove(actividadSeleccionada);
+                // Eliminar de la base de datos (las inscripciones se eliminan automáticamente por CASCADE)
+                bool exito = DatabaseConnection.EliminarActividad(actividadSeleccionada.IdActividad);
 
-                UsuarioWindow.Actividades.Remove(actividadSeleccionada);
-                LimpiarFormulario();
-                ActualizarVista();
-                MessageBox.Show("Actividad eliminada.", "Hecho", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (exito)
+                {
+                    LimpiarFormulario();
+                    ActualizarVista();
+                    MessageBox.Show("Actividad eliminada.", "Hecho", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
         }
 
         private void CargarComboActividades()
         {
+            // Recargar actividades antes de llenar el combo
+            RecargarActividadesDesdeBaseDatos();
+
             cmbActividades.Items.Clear();
             foreach (var act in UsuarioWindow.Actividades)
                 cmbActividades.Items.Add(act.Nombre);
@@ -198,6 +229,11 @@ namespace TopGym
             if (cmbActividades.SelectedIndex < 0) return;
 
             var actividadSeleccionada = UsuarioWindow.Actividades[cmbActividades.SelectedIndex];
+
+            // Recargar los inscritos desde la base de datos para tener datos actualizados
+            List<Usuario> inscritos = DatabaseConnection.ObtenerUsuariosDeActividad(actividadSeleccionada.IdActividad);
+            actividadSeleccionada.inscritos = new System.Collections.ObjectModel.ObservableCollection<Usuario>(inscritos);
+
             dgInscritos.ItemsSource = actividadSeleccionada.inscritos;
         }
 

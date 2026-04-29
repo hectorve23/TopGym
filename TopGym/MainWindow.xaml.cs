@@ -23,13 +23,69 @@ namespace TopGym
         public MainWindow()
         {
             InitializeComponent();
-            CargarUsuariosPrueba();
+            InicializarAplicacion();
         }
 
-        private void CargarUsuariosPrueba()
+        /// <summary>
+        /// Inicializa la aplicación: prueba conexión y carga datos desde la base de datos
+        /// </summary>
+        private void InicializarAplicacion()
         {
-            usuarios.Add(new Usuario { Nombre = "admin", Contrasena = "1234", Rol = RolUsuario.Administrador });
-            usuarios.Add(new Usuario { Nombre = "juan", Contrasena = "abcd", Rol = RolUsuario.Usuario });
+            // Probar la conexión a la base de datos
+            if (!DatabaseConnection.ProbarConexion())
+            {
+                MessageBox.Show("No se pudo conectar a la base de datos.\nAsegúrate de que MySQL esté ejecutándose y que la base de datos TopGymDB exista.",
+                    "Error de Conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.Close();
+                return;
+            }
+
+            // Cargar todos los datos desde la base de datos
+            CargarDatosDesdeBaseDatos();
+        }
+
+        /// <summary>
+        /// Carga todos los usuarios y actividades desde la base de datos al iniciar la aplicación
+        /// </summary>
+        private void CargarDatosDesdeBaseDatos()
+        {
+            try
+            {
+                // Cargar usuarios
+                usuarios.Clear();
+                List<Usuario> usuariosBD = DatabaseConnection.ObtenerTodosUsuarios();
+                foreach (var usuario in usuariosBD)
+                {
+                    usuarios.Add(usuario);
+                }
+
+                // Cargar actividades en la colección estática de UsuarioWindow
+                UsuarioWindow.Actividades.Clear();
+                List<Actividad> actividadesBD = DatabaseConnection.ObtenerTodasActividades();
+
+                foreach (var actividad in actividadesBD)
+                {
+                    // Cargar los usuarios inscritos en cada actividad
+                    List<Usuario> inscritos = DatabaseConnection.ObtenerUsuariosDeActividad(actividad.IdActividad);
+                    actividad.inscritos = new ObservableCollection<Usuario>(inscritos);
+
+                    UsuarioWindow.Actividades.Add(actividad);
+                }
+
+                // Cargar las actividades inscritas para cada usuario
+                foreach (var usuario in usuarios)
+                {
+                    List<Actividad> actividadesUsuario = DatabaseConnection.ObtenerActividadesDeUsuario(usuario.IdUsuario);
+                    usuario.ActividadesInscritas = new ObservableCollection<Actividad>(actividadesUsuario);
+                }
+
+                Console.WriteLine($"Datos cargados: {usuarios.Count} usuarios, {UsuarioWindow.Actividades.Count} actividades");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar los datos: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void IniciarSesion_Click(object sender, RoutedEventArgs e)
@@ -43,15 +99,8 @@ namespace TopGym
                 return;
             }
 
-            Usuario usuarioEncontrado = null;
-            foreach (var u in usuarios)
-            {
-                if (u.Nombre == nombreIntroducido && u.Contrasena == passwordIntroducida)
-                {
-                    usuarioEncontrado = u;
-                    break;
-                }
-            }
+            // Validar usuario contra la base de datos
+            Usuario usuarioEncontrado = DatabaseConnection.ValidarUsuario(nombreIntroducido, passwordIntroducida);
 
             if (usuarioEncontrado == null)
             {
@@ -59,6 +108,11 @@ namespace TopGym
                 return;
             }
 
+            // Cargar las actividades en las que está inscrito el usuario
+            List<Actividad> actividadesInscritas = DatabaseConnection.ObtenerActividadesDeUsuario(usuarioEncontrado.IdUsuario);
+            usuarioEncontrado.ActividadesInscritas = new ObservableCollection<Actividad>(actividadesInscritas);
+
+            // Abrir la ventana correspondiente según el rol
             if (usuarioEncontrado.Rol == RolUsuario.Administrador)
             {
                 AdminWindow adminWin = new AdminWindow(usuarioEncontrado);
@@ -77,6 +131,9 @@ namespace TopGym
         {
             RegistroWindow registro = new RegistroWindow();
             registro.ShowDialog();
+
+            // Recargar usuarios después del registro por si se creó uno nuevo
+            CargarDatosDesdeBaseDatos();
         }
     }
 }
