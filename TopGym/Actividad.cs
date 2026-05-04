@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace TopGym
 {
-    public class Actividad
+    public class Actividad : INotifyPropertyChanged
     {
         public int IdActividad { get; set; }
         public string Nombre { get; set; }
@@ -17,5 +18,7 @@ namespace TopGym
         public ObservableCollection<Usuario> inscritos { get; set; } = new ObservableCollection<Usuario>();
 
         public int PlazasLibres => PlazasTotal - inscritos.Count;
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
